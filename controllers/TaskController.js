@@ -36,6 +36,13 @@ export const updateTask = async (req, res) => {
   res.send('update list');
 };
 
+export const deleteTask = async (req, res) => {
+  const { id } = req.params;
+  await Task.deleteOne({ _id: id });
+
+  res.send({ msg: 'Delete successfully' });
+};
+
 export const getAllTasks = async (req, res) => {
   const tasks = await Task.find({ list: req.params.listId });
 

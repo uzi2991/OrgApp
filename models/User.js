@@ -19,6 +19,15 @@ const UserSchema = new Schema({
     minlength: 6,
     select: false,
   },
+  first_name: {
+    type: String,
+    required: [true, 'Please provide first_name'],
+    minlength: 1,
+  },
+  last_name: {
+    type: String,
+    required: [true, 'Please provide last_name'],
+  },
   projects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
 });
 

@@ -3,16 +3,17 @@ import User from '../models/User.js';
 
 export const checkAuth = async (req, res) => {
   console.log('Check auth');
+  const user = await User.findById(req.user.userId);
 
-  res.json(req.user);
-}
+  res.json(user);
+};
 
 export const signUp = async (req, res, next) => {
   console.log('Sign up');
   console.log(req.body);
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { email, password, first_name, last_name } = req.body;
+    if (!email || !password || !first_name || !last_name) {
       throw new BadRequestError('please provide all values');
     }
 
@@ -21,12 +22,10 @@ export const signUp = async (req, res, next) => {
       throw new BadRequestError('Email already in use');
     }
 
-    const user = await User.create({ email, password });
+    const user = await User.create({ email, password, first_name, last_name });
     const token = user.createJWT();
     res.status(201).json({
-      user: {
-        email: user.email,
-      },
+      user,
       token,
     });
   } catch (err) {

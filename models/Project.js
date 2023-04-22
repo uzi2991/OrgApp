@@ -4,7 +4,12 @@ const ProjectSchema = new Schema(
   {
     name: {
       type: String,
+      minlength: 1,
       required: [true, 'Please provide name'],
+    },
+    description: {
+      type: String,
+      required: [true, 'Please provide description']
     },
 
     createdBy: {
