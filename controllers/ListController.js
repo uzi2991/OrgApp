@@ -33,11 +33,6 @@ export const updateList = async (req, res) => {
   res.send('update list');
 };
 
-export const getAllLists = async (req, res) => {
-  const lists = await List.find({ project: req.params.projectId });
-
-  res.status(200).json({ lists, totalLists: lists.length });
-};
 
 export const showStats = async (req, res) => {
   res.send('show stats');

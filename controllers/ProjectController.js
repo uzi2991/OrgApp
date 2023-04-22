@@ -1,6 +1,7 @@
 import BadRequestError from '../errors/BadRequest.js';
 import Project from '../models/Project.js';
 import User from '../models/User.js';
+import List from '../models/List.js';
 
 export const createProject = async (req, res, next) => {
   console.log('create project');
@@ -28,12 +29,11 @@ export const createProject = async (req, res, next) => {
 };
 
 export const deleteProject = async (req, res) => {
-  const { id } = req.params;
-  console.log(id);
-  await Project.deleteOne({ _id: id });
+  const { pid } = req.params;
+  await Project.deleteOne({ _id: pid });
   await User.findByIdAndUpdate(req.user.userId, {
     $pull: {
-      projects: id,
+      projects: pid,
     },
   });
   res.send({ msg: 'Delete successfully' });
@@ -42,9 +42,9 @@ export const deleteProject = async (req, res) => {
 export const inviteMembers = async (req, res, next) => {
   console.log('Invite members');
   try {
-    const { id } = req.params;
+    const { pid } = req.params;
     const { users } = req.body;
-    const project = await Project.findById(id);
+    const project = await Project.findById(pid);
 
     if (!project) {
       throw new BadRequestError('Project not exist');
@@ -64,6 +64,10 @@ export const inviteMembers = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getProjectInfo = async (req, res) => {
+  const lists = await List.find({ project: req.params.projectId });
+}
 
 export const updateProject = async (req, res) => {
   res.send('update job');
