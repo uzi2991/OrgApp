@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import AuthRouter from './routes/AuthRouter.js';
 import ProjectRouter from './routes/ProjectRouter.js';
+import ListRouter from './routes/ListRouter.js';
 import connectDB from './db/connect.js';
 import AuthMiddleware from './middlewares/Auth.js';
 import NotFoundMiddleware from './middlewares/NotFound.js';
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', AuthRouter);
 app.use('/api/project', AuthMiddleware, ProjectRouter);
+app.use('/api/list', AuthMiddleware, ListRouter);
 
 app.use(NotFoundMiddleware);
 app.use(ErrorHandlerMiddleware);

@@ -3,16 +3,10 @@ import {
   createList,
   updateList,
   deleteList,
-  getAllLists,
-  showStats,
 } from '../controllers/ListController.js';
 
 const router = Router();
 
-router.route('/').get(getAllProjects).post(createProject);
-
-router.route('/stats').get(showStats);
-
-router.route('/:id').delete(deleteProject).patch(updateProject);
+router.route('/').post(createList);
 
 export default router;

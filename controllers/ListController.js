@@ -4,19 +4,20 @@ import User from '../models/User.js';
 import List from '../models/List.js';
 
 export const createList = async (req, res, next) => {
+  console.log('Create List');
   try {
-    const { name, projectId } = req.body;
+    const { title, project } = req.body;
 
-    if (!name || !projectId) {
+    if (!title || !project) {
       throw new BadRequestError('Please provide all values');
     }
 
     const list = await List.create({
-      name,
-      project: projectId,
+      title,
+      project,
     });
 
-    res.status(201).json({ list });
+    res.status(201).json(list);
   } catch (err) {
     next(err);
   }
@@ -32,7 +33,6 @@ export const deleteList = async (req, res) => {
 export const updateList = async (req, res) => {
   res.send('update list');
 };
-
 
 export const showStats = async (req, res) => {
   res.send('show stats');

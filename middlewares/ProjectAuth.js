@@ -1,5 +1,5 @@
-import ForbiddenError from '../errors/Forbidden';
-import User from '../models/User';
+import ForbiddenError from '../errors/Forbidden.js';
+import User from '../models/User.js';
 
 const ProjectAuthMiddleware = async (req, res, next) => {
   try {
@@ -16,4 +16,4 @@ const ProjectAuthMiddleware = async (req, res, next) => {
   }
 };
 
-export default AuthMiddleware;
+export default ProjectAuthMiddleware;

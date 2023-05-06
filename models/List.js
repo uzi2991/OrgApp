@@ -2,9 +2,9 @@ import mongoose, { Schema } from 'mongoose';
 
 const ListSchema = new Schema(
   {
-    name: {
+    title: {
       type: String,
-      required: [true, 'Please provide name'],
+      required: [true, 'Please provide title'],
     },
     project: {
       type: Schema.Types.ObjectId,

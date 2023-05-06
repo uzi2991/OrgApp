@@ -6,6 +6,7 @@ import {
   getAllProjects,
   showStats,
   inviteMembers,
+  getProjectInfo,
 } from '../controllers/ProjectController.js';
 import ProjectAuthMiddleware from '../middlewares/ProjectAuth.js';
 
@@ -17,8 +18,9 @@ router.route('/stats').get(showStats);
 
 router
   .route('/:pid')
+  .get(ProjectAuthMiddleware, getProjectInfo)
   .delete(ProjectAuthMiddleware, deleteProject)
-  .patch(ProjectAuthMiddleware, updateProject);
+  .post(ProjectAuthMiddleware, updateProject);
 router.route('/:pid/invite').post(ProjectAuthMiddleware, inviteMembers);
 
 export default router;

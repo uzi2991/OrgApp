@@ -8,7 +8,7 @@ export const createProject = async (req, res, next) => {
   try {
     const { name, description } = req.body;
 
-    if (!name || !description) {
+    if (!name) {
       throw new BadRequestError('Please provide all values');
     }
 
@@ -66,18 +66,32 @@ export const inviteMembers = async (req, res, next) => {
 };
 
 export const getProjectInfo = async (req, res) => {
-  const lists = await List.find({ project: req.params.projectId });
-}
+  const project = await Project.findById(req.params.pid);
+  const lists = await List.find({ project: req.params.pid });
+
+  console.log('Project info');
+
+  const projectRes = project.toObject();
+  projectRes.lists = lists;
+  console.log(projectRes);
+  res.status(200).json(projectRes);
+};
 
 export const updateProject = async (req, res) => {
-  res.send('update job');
+  const project = await Project.findByIdAndUpdate(req.params.pid, req.body);
+  console.log('Update project');
+
+  res.status(200).json(project);
 };
 
 export const getAllProjects = async (req, res) => {
   const user = await User.findById(req.user.userId);
   const projects = await Project.find({ _id: { $in: user.projects } });
-
-  res.status(200).json(projects);
+  if (req.query.sort === 'recent') {
+    res.status(200).json(projects);
+  } else {
+    res.status(200).json(projects);
+  }
 };
 
 export const showStats = async (req, res) => {

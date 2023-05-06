@@ -1,11 +1,17 @@
 import { BadRequestError, UnAuthenticatedError } from '../errors/index.js';
 import User from '../models/User.js';
 
+function withoutProperty(obj, property) {
+  obj[property] = null;
+
+  return obj;
+}
+
 export const checkAuth = async (req, res) => {
   console.log('Check auth');
   const user = await User.findById(req.user.userId);
 
-  res.json(user);
+  res.json(withoutProperty(user, 'password'));
 };
 
 export const signUp = async (req, res, next) => {
@@ -24,8 +30,9 @@ export const signUp = async (req, res, next) => {
 
     const user = await User.create({ email, password, first_name, last_name });
     const token = user.createJWT();
+
     res.status(201).json({
-      user,
+      user: withoutProperty(user, 'password'),
       token,
     });
   } catch (err) {
@@ -55,9 +62,7 @@ export const signIn = async (req, res, next) => {
     const token = user.createJWT();
 
     res.status(200).json({
-      user: {
-        email: user.email,
-      },
+      user: withoutProperty(user, 'password'),
       token,
     });
   } catch (err) {
