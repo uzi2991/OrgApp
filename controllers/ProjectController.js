@@ -6,14 +6,14 @@ import List from '../models/List.js';
 export const createProject = async (req, res, next) => {
   console.log('create project');
   try {
-    const { name, description } = req.body;
+    const { title, description } = req.body;
 
-    if (!name) {
+    if (!title) {
       throw new BadRequestError('Please provide all values');
     }
 
     const project = await Project.create({
-      name,
+      title,
       description,
       createdBy: req.user.userId,
       members: [req.user.userId],
@@ -54,6 +54,8 @@ export const inviteMembers = async (req, res, next) => {
       users.map(async (userEmail) => {
         const user = await User.findOne({ email: userEmail });
         if (user && !project.members.includes(user._id)) {
+          user.projects.push(project._id);
+          await user.save();
           project.members.push(user._id);
         }
       }),
@@ -65,23 +67,37 @@ export const inviteMembers = async (req, res, next) => {
   }
 };
 
-export const getProjectInfo = async (req, res) => {
-  const project = await Project.findById(req.params.pid);
-  const lists = await List.find({ project: req.params.pid });
+export const removeMember = async (req, res, next) => {};
 
-  console.log('Project info');
+const projectInfoHelper = async (project) => {
+  const lists = await List.find({ project: project._id });
+  const members = await User.find({ _id: { $in: project.members } }).select(
+    'first_name last_name email',
+  );
 
   const projectRes = project.toObject();
   projectRes.lists = lists;
-  console.log(projectRes);
-  res.status(200).json(projectRes);
+  projectRes.members = members;
+
+  return projectRes;
+};
+
+export const getProjectInfo = async (req, res) => {
+  const project = await Project.findById(req.params.pid);
+
+  const projectInfo = await projectInfoHelper(project);
+
+  res.status(200).json(projectInfo);
 };
 
 export const updateProject = async (req, res) => {
-  const project = await Project.findByIdAndUpdate(req.params.pid, req.body);
-  console.log('Update project');
+  const project = await Project.findByIdAndUpdate(req.params.pid, req.body, {
+    new: true,
+  });
 
-  res.status(200).json(project);
+  const projectInfo = await projectInfoHelper(project);
+
+  res.status(200).json(projectInfo);
 };
 
 export const getAllProjects = async (req, res) => {

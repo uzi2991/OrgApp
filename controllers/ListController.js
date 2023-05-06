@@ -26,12 +26,16 @@ export const createList = async (req, res, next) => {
 export const deleteList = async (req, res) => {
   const { id } = req.params;
   await List.deleteOne({ _id: id });
+  console.log('delete list');
 
   res.send({ msg: 'Delete successfully' });
 };
 
 export const updateList = async (req, res) => {
-  res.send('update list');
+  const { id } = req.params;
+  const list = await List.findByIdAndUpdate(id, req.body, { new: true });
+
+  res.status(200).json(list);
 };
 
 export const showStats = async (req, res) => {

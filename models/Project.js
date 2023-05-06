@@ -2,14 +2,14 @@ import mongoose, { Schema } from 'mongoose';
 
 const ProjectSchema = new Schema(
   {
-    name: {
+    title: {
       type: String,
       minlength: 1,
-      required: [true, 'Please provide name'],
+      required: [true, 'Please provide title'],
     },
     description: {
       type: String,
-      required: [true, 'Please provide description']
+      required: [true, 'Please provide description'],
     },
 
     createdBy: {

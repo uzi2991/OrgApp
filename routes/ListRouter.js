@@ -8,5 +8,6 @@ import {
 const router = Router();
 
 router.route('/').post(createList);
+router.route('/:id').delete(deleteList).post(updateList);
 
 export default router;
