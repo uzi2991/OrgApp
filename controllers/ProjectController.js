@@ -2,6 +2,8 @@ import BadRequestError from '../errors/BadRequest.js';
 import Project from '../models/Project.js';
 import User from '../models/User.js';
 import List from '../models/List.js';
+import UnAuthenticatedError from '../errors/UnAuthenticated.js';
+import ForbiddenError from '../errors/Forbidden.js';
 
 export const createProject = async (req, res, next) => {
   console.log('create project');
@@ -50,6 +52,10 @@ export const inviteMembers = async (req, res, next) => {
       throw new BadRequestError('Project not exist');
     }
 
+    if (project.createdBy.toString() !== req.user.userId) {
+      throw new ForbiddenError('Forbidden');
+    }
+
     await Promise.all(
       users.map(async (userEmail) => {
         const user = await User.findOne({ email: userEmail });
@@ -67,9 +73,50 @@ export const inviteMembers = async (req, res, next) => {
   }
 };
 
-export const removeMember = async (req, res, next) => {};
+export const removeMember = async (req, res, next) => {
+  console.log('remove member');
+  try {
+    const { pid } = req.params;
+    const { userId } = req.body;
+
+    const project = await Project.findById(pid);
+
+    if (!project) {
+      throw new BadRequestError('Project not exist');
+    }
+
+    if (project.createdBy.toString() === userId) {
+      throw new BadRequestError('Cannot remove admin');
+    }
+
+    if (
+      project.createdBy.toString() !== req.user.userId &&
+      userId !== req.user.userId
+    ) {
+      throw new ForbiddenError('Forbidden');
+    }
+
+    project.members.pull(userId);
+
+    await project.save();
+
+    await User.findByIdAndUpdate(userId, {
+      $pull: {
+        projects: pid,
+      },
+    });
+
+    res.json({ msg: 'Delete successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
 
 const projectInfoHelper = async (project) => {
+  if (project === null) {
+    return null;
+  }
+
   const lists = await List.find({ project: project._id });
   const members = await User.find({ _id: { $in: project.members } }).select(
     'first_name last_name email',

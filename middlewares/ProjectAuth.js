@@ -6,6 +6,7 @@ const ProjectAuthMiddleware = async (req, res, next) => {
     const userId = req.user.userId;
     const projectId = req.params.pid;
     const user = await User.findById(userId);
+
     if (user.projects.includes(projectId)) {
       next();
     } else {
