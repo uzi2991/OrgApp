@@ -2,8 +2,10 @@ import BadRequestError from '../errors/BadRequest.js';
 import Project from '../models/Project.js';
 import User from '../models/User.js';
 import List from '../models/List.js';
+import Task from '../models/Task.js';
 import UnAuthenticatedError from '../errors/UnAuthenticated.js';
 import ForbiddenError from '../errors/Forbidden.js';
+import { listInfoHelper } from './ListController.js';
 
 export const createProject = async (req, res, next) => {
   console.log('create project');
@@ -16,7 +18,7 @@ export const createProject = async (req, res, next) => {
 
     const project = await Project.create({
       title,
-      description,
+      description: description || '',
       createdBy: req.user.userId,
       members: [req.user.userId],
     });
@@ -123,7 +125,13 @@ const projectInfoHelper = async (project) => {
   );
 
   const projectRes = project.toObject();
-  projectRes.lists = lists;
+
+  projectRes.lists = [];
+  for (const list of lists) {
+    const listRes = await listInfoHelper(list);
+    projectRes.lists.push(listRes);
+  }
+
   projectRes.members = members;
 
   return projectRes;
@@ -138,6 +146,7 @@ export const getProjectInfo = async (req, res) => {
 };
 
 export const updateProject = async (req, res) => {
+  console.log('Update Project');
   const project = await Project.findByIdAndUpdate(req.params.pid, req.body, {
     new: true,
   });

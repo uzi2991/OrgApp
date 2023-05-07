@@ -8,8 +8,7 @@ const ProjectSchema = new Schema(
       required: [true, 'Please provide title'],
     },
     description: {
-      type: String,
-      required: [true, 'Please provide description'],
+      type: String
     },
 
     createdBy: {

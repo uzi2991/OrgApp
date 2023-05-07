@@ -2,6 +2,20 @@ import BadRequestError from '../errors/BadRequest.js';
 import Project from '../models/Project.js';
 import User from '../models/User.js';
 import List from '../models/List.js';
+import Task from '../models/Task.js';
+
+export const listInfoHelper = async (list) => {
+  if (list === null) {
+    return null;
+  }
+
+  const tasks = await Task.find({ list: list._id });
+
+  const listRes = list.toObject();
+  listRes.items = tasks;
+
+  return listRes;
+};
 
 export const createList = async (req, res, next) => {
   console.log('Create List');
@@ -17,7 +31,9 @@ export const createList = async (req, res, next) => {
       project,
     });
 
-    res.status(201).json(list);
+    const listRes = await listInfoHelper(list);
+
+    res.status(201).json(listRes);
   } catch (err) {
     next(err);
   }
@@ -35,9 +51,7 @@ export const updateList = async (req, res) => {
   const { id } = req.params;
   const list = await List.findByIdAndUpdate(id, req.body, { new: true });
 
-  res.status(200).json(list);
-};
+  const listRes = await listInfoHelper(list);
 
-export const showStats = async (req, res) => {
-  res.send('show stats');
+  res.status(200).json(listRes);
 };
