@@ -158,12 +158,20 @@ export const updateProject = async (req, res) => {
 
 export const getAllProjects = async (req, res) => {
   const user = await User.findById(req.user.userId);
-  const projects = await Project.find({ _id: { $in: user.projects } });
+  let projects = await Project.find({ _id: { $in: user.projects } });
   if (req.query.sort === 'recent') {
     res.status(200).json(projects);
-  } else {
-    res.status(200).json(projects);
+    return;
   }
+
+  if (req.query.q) {
+    console.log('Query ' + req.query.q);
+    projects = projects.filter((project) =>
+      project.title.toLowerCase().startsWith(req.query.q.toLowerCase()),
+    );
+  }
+
+  res.status(200).json(projects);
 };
 
 export const showStats = async (req, res) => {

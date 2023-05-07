@@ -2,6 +2,10 @@ import { BadRequestError, UnAuthenticatedError } from '../errors/index.js';
 import User from '../models/User.js';
 
 function withoutProperty(obj, property) {
+  if (obj === null) {
+    return null;
+  }
+  
   obj[property] = null;
 
   return obj;
