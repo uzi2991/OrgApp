@@ -17,6 +17,11 @@ export const listInfoHelper = async (list) => {
   return listRes;
 };
 
+export const listDeleteHelper = async (listId) => {
+  await List.deleteOne({ _id: listId });
+  await Task.deleteMany({ list: listId });
+};
+
 export const createList = async (req, res, next) => {
   console.log('Create List');
   try {
@@ -41,7 +46,7 @@ export const createList = async (req, res, next) => {
 
 export const deleteList = async (req, res) => {
   const { id } = req.params;
-  await List.deleteOne({ _id: id });
+  await listDeleteHelper(id);
   console.log('delete list');
 
   res.send({ msg: 'Delete successfully' });

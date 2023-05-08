@@ -5,7 +5,38 @@ import List from '../models/List.js';
 import Task from '../models/Task.js';
 import UnAuthenticatedError from '../errors/UnAuthenticated.js';
 import ForbiddenError from '../errors/Forbidden.js';
-import { listInfoHelper } from './ListController.js';
+import { listDeleteHelper, listInfoHelper } from './ListController.js';
+
+const projectInfoHelper = async (project) => {
+  if (project === null) {
+    return null;
+  }
+
+  const lists = await List.find({ project: project._id });
+  const members = await User.find({ _id: { $in: project.members } }).select(
+    'first_name last_name email',
+  );
+
+  const projectRes = project.toObject();
+
+  projectRes.lists = [];
+  for (const list of lists) {
+    const listRes = await listInfoHelper(list);
+    projectRes.lists.push(listRes);
+  }
+
+  projectRes.members = members;
+
+  return projectRes;
+};
+
+const projectDeleteHelper = async (projectId) => {
+  await Project.deleteOne({ _id: projectId });
+  const lists = List.find({ project: projectId });
+  for (const list of lists) {
+    await listDeleteHelper(list._id);
+  }
+};
 
 export const createProject = async (req, res, next) => {
   console.log('create project');
@@ -34,7 +65,7 @@ export const createProject = async (req, res, next) => {
 
 export const deleteProject = async (req, res) => {
   const { pid } = req.params;
-  await Project.deleteOne({ _id: pid });
+  await projectDeleteHelper(pid);
   await User.findByIdAndUpdate(req.user.userId, {
     $pull: {
       projects: pid,
@@ -58,18 +89,31 @@ export const inviteMembers = async (req, res, next) => {
       throw new ForbiddenError('Forbidden');
     }
 
+    const newUsers = [];
+
     await Promise.all(
       users.map(async (userEmail) => {
         const user = await User.findOne({ email: userEmail });
         if (user && !project.members.includes(user._id)) {
           user.projects.push(project._id);
           await user.save();
+
+          newUsers.push({
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            _id: user._id,
+          });
           project.members.push(user._id);
         }
       }),
     );
 
     await project.save();
+
+    res.status(200).json(newUsers);
+
+    res.json();
   } catch (err) {
     next(err);
   }
@@ -112,29 +156,6 @@ export const removeMember = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
-
-const projectInfoHelper = async (project) => {
-  if (project === null) {
-    return null;
-  }
-
-  const lists = await List.find({ project: project._id });
-  const members = await User.find({ _id: { $in: project.members } }).select(
-    'first_name last_name email',
-  );
-
-  const projectRes = project.toObject();
-
-  projectRes.lists = [];
-  for (const list of lists) {
-    const listRes = await listInfoHelper(list);
-    projectRes.lists.push(listRes);
-  }
-
-  projectRes.members = members;
-
-  return projectRes;
 };
 
 export const getProjectInfo = async (req, res) => {
