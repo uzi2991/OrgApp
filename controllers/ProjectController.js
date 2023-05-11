@@ -31,11 +31,24 @@ const projectInfoHelper = async (project) => {
 };
 
 const projectDeleteHelper = async (projectId) => {
-  await Project.deleteOne({ _id: projectId });
-  const lists = List.find({ project: projectId });
+  const project = await Project.findOneAndDelete({ _id: projectId });
+  const lists = await List.find({ project: projectId });
   for (const list of lists) {
     await listDeleteHelper(list._id);
   }
+
+  await User.updateMany(
+    {
+      _id: {
+        $in: project.members,
+      },
+    },
+    {
+      $pull: {
+        projects: projectId,
+      },
+    },
+  );
 };
 
 export const createProject = async (req, res, next) => {
@@ -64,13 +77,10 @@ export const createProject = async (req, res, next) => {
 };
 
 export const deleteProject = async (req, res) => {
+  console.log('delete Project');
   const { pid } = req.params;
   await projectDeleteHelper(pid);
-  await User.findByIdAndUpdate(req.user.userId, {
-    $pull: {
-      projects: pid,
-    },
-  });
+
   res.send({ msg: 'Delete successfully' });
 };
 
