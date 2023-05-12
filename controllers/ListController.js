@@ -3,6 +3,7 @@ import Project from '../models/Project.js';
 import User from '../models/User.js';
 import List from '../models/List.js';
 import Task from '../models/Task.js';
+import { taskInfoHelper } from './TaskController.js';
 
 export const listInfoHelper = async (list) => {
   if (list === null) {
@@ -12,7 +13,12 @@ export const listInfoHelper = async (list) => {
   const tasks = await Task.find({ list: list._id });
 
   const listRes = list.toObject();
-  listRes.items = tasks;
+  listRes.items = [];
+
+  for (const task of tasks) {
+    const taskRes = await taskInfoHelper(task);
+    listRes.items.push(taskRes);
+  }
 
   return listRes;
 };

@@ -4,6 +4,55 @@ import User from '../models/User.js';
 import List from '../models/List.js';
 import Task from '../models/Task.js';
 
+export const taskInfoHelper = async (task) => {
+  if (task === null) {
+    return null;
+  }
+
+  const members = await User.find({ _id: { $in: task.members } }).select(
+    'first_name last_name email',
+  );
+
+  const taskRes = task.toObject();
+  taskRes.members = members;
+
+  return taskRes;
+};
+
+export const assignMember = async (req, res, next) => {
+  console.log('Assign member');
+  try {
+    const { id } = req.params;
+    const { user } = req.body;
+
+    const task = await Task.findById(id);
+    if (!task) {
+      throw new BadRequestError('Task not exist');
+    }
+
+    const member = await User.findOne({ email: user });
+    console.log(member);
+    if (!member) {
+      throw new BadRequestError('Member not exist');
+    }
+
+    const list = await List.findById(task.list);
+    const project = await Project.findById(list.project);
+
+    if (!project.members.includes(member._id)) {
+      throw new BadRequestError('Member not in this project');
+    }
+
+    task.members.push(member._id);
+    await task.save();
+
+    const taskRes = await taskInfoHelper(task);
+    res.status(200).json(taskRes);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const createTask = async (req, res, next) => {
   console.log('create task');
   try {
@@ -20,7 +69,9 @@ export const createTask = async (req, res, next) => {
       members: [],
     });
 
-    res.status(201).json(task);
+    const taskRes = await taskInfoHelper(task);
+
+    res.status(201).json(taskRes);
   } catch (err) {
     next(err);
   }
@@ -31,7 +82,9 @@ export const updateTask = async (req, res) => {
   const { id } = req.params;
   const task = await Task.findByIdAndUpdate(id, req.body, { new: true });
 
-  res.status(200).json(task);
+  const taskRes = await taskInfoHelper(task);
+
+  res.status(200).json(taskRes);
 };
 
 export const deleteTask = async (req, res) => {

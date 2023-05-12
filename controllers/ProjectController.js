@@ -122,8 +122,6 @@ export const inviteMembers = async (req, res, next) => {
     await project.save();
 
     res.status(200).json(newUsers);
-
-    res.json();
   } catch (err) {
     next(err);
   }
