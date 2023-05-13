@@ -83,6 +83,7 @@ export const createTask = async (req, res, next) => {
       title,
       description: '',
       list,
+      due_date: null,
       members: [],
     });
 
