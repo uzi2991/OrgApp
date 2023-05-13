@@ -7,7 +7,7 @@ const TaskSchema = new Schema(
       required: [true, 'Please provide title'],
     },
     description: {
-      type: String
+      type: String,
     },
 
     list: {
@@ -17,6 +17,9 @@ const TaskSchema = new Schema(
     },
 
     members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    due_date: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );

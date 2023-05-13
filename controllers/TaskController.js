@@ -31,7 +31,6 @@ export const assignMember = async (req, res, next) => {
     }
 
     const member = await User.findOne({ email: user });
-    console.log(member);
     if (!member) {
       throw new BadRequestError('Member not exist');
     }
@@ -47,6 +46,24 @@ export const assignMember = async (req, res, next) => {
     await task.save();
 
     const taskRes = await taskInfoHelper(task);
+    res.status(200).json(taskRes);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const removeMember = async (req, res, next) => {
+  console.log('remove member');
+  try {
+    const { id } = req.params;
+    const { user } = req.body;
+    const task = await Task.findByIdAndUpdate(id, {
+      $pull: {
+        members: user,
+      },
+    });
+    const taskRes = await taskInfoHelper(task);
+
     res.status(200).json(taskRes);
   } catch (err) {
     next(err);
