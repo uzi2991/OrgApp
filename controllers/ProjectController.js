@@ -152,6 +152,21 @@ export const removeMember = async (req, res, next) => {
 
     project.members.pull(userId);
 
+    const list = await List.find({ project: project._id });
+    const listIds = list.map((list) => list._id);
+    await Task.updateMany(
+      {
+        list: {
+          $in: listIds,
+        },
+      },
+      {
+        $pull: {
+          members: userId,
+        },
+      },
+    );
+
     await project.save();
 
     await User.findByIdAndUpdate(userId, {
@@ -187,22 +202,18 @@ export const updateProject = async (req, res) => {
 
 export const getAllProjects = async (req, res) => {
   const user = await User.findById(req.user.userId);
-  let projects = await Project.find({ _id: { $in: user.projects } });
-  if (req.query.sort === 'recent') {
-    res.status(200).json(projects);
-    return;
+  const projects = await Project.find({ _id: { $in: user.projects } });
+  let projectsRes = [];
+  for (const project of projects) {
+    const _project = await projectInfoHelper(project);
+    projectsRes.push(_project);
   }
 
   if (req.query.q) {
-    console.log('Query ' + req.query.q);
-    projects = projects.filter((project) =>
+    projectsRes = projectsRes.filter((project) =>
       project.title.toLowerCase().startsWith(req.query.q.toLowerCase()),
     );
   }
 
-  res.status(200).json(projects);
-};
-
-export const showStats = async (req, res) => {
-  res.send('show stats');
+  res.status(200).json(projectsRes);
 };

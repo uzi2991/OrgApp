@@ -9,9 +9,9 @@ export const taskInfoHelper = async (task) => {
     return null;
   }
 
-  const members = await User.find({ _id: { $in: task.members } }).select(
-    'first_name last_name email',
-  );
+  const members = await User.find({
+    _id: { $in: task.members },
+  }).select('first_name last_name email');
 
   const taskRes = task.toObject();
   taskRes.members = members;
@@ -84,6 +84,7 @@ export const createTask = async (req, res, next) => {
       description: '',
       list,
       due_date: null,
+      done: false,
       members: [],
     });
 

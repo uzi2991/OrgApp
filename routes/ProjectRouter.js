@@ -4,7 +4,6 @@ import {
   updateProject,
   deleteProject,
   getAllProjects,
-  showStats,
   inviteMembers,
   getProjectInfo,
   removeMember,
@@ -15,7 +14,6 @@ const router = Router();
 
 router.route('/').get(getAllProjects).post(createProject);
 
-router.route('/stats').get(showStats);
 
 router
   .route('/:pid')

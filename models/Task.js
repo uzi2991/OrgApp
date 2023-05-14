@@ -20,6 +20,9 @@ const TaskSchema = new Schema(
     due_date: {
       type: Date,
     },
+    done: {
+      type: Boolean,
+    },
   },
   { timestamps: true },
 );
