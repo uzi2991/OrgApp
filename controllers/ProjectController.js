@@ -203,11 +203,13 @@ export const updateProject = async (req, res) => {
 export const getAllProjects = async (req, res) => {
   const user = await User.findById(req.user.userId);
   const projects = await Project.find({ _id: { $in: user.projects } });
-  let projectsRes = [];
-  for (const project of projects) {
-    const _project = await projectInfoHelper(project);
-    projectsRes.push(_project);
-  }
+  // let projectsRes = [];
+  // for (const project of projects) {
+  //   const _project = await projectInfoHelper(project);
+  //   projectsRes.push(_project);
+  // }
+
+  let projectsRes = projects;
 
   if (req.query.q) {
     projectsRes = projectsRes.filter((project) =>
